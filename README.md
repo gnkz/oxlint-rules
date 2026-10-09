@@ -144,16 +144,18 @@ The repository lints itself with the rules from `src` (see `oxlint.config.ts`). 
 
 ## Releasing
 
-Releases are published to npm by [`.github/workflows/release.yml`](.github/workflows/release.yml) using
-[trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC), so no npm token is stored in
-GitHub. Packages get a provenance attestation.
+Versions and changelogs are managed with [Changesets](https://changesets.dev).
 
-1. Bump `version` in `package.json` and commit.
-2. Tag and push: `git tag v0.2.0 && git push origin main v0.2.0`.
+1. In any PR that should ship, run `pnpm changeset`, pick the bump (patch, minor or major), describe
+   the change, and commit the generated file in `.changeset/`.
+2. When that PR lands on `main`, [`.github/workflows/release.yml`](.github/workflows/release.yml) opens
+   or updates a "Version Packages" PR that bumps `package.json` and writes `CHANGELOG.md`.
+3. Merging the "Version Packages" PR runs the checks, publishes to npm and creates the git tag and
+   GitHub release.
 
-The workflow runs the full check, verifies the tag matches `package.json`, publishes, and creates a
-GitHub release with generated notes. Versions with a prerelease suffix (`1.0.0-beta.1`) are published
-under the `next` dist-tag.
+Publishing uses npm [trusted publishing](https://docs.npmjs.com/trusted-publishers) (OIDC), so no npm
+token is stored in GitHub. Only the publish job gets `id-token: write`, and it runs in the `npm`
+environment.
 
 ## License
 

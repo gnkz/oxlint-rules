@@ -44,12 +44,15 @@
 		"typecheck": "tsc --noEmit",
 		"test": "vitest run",
 		"check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-		"prepublishOnly": "pnpm build"
+		"prepublishOnly": "pnpm build",
+		"changeset": "changeset"
 	},
 	"dependencies": {
 		"@oxlint/plugins": "^1.87.0"
 	},
 	"devDependencies": {
+		"@changesets/changelog-github": "^1.0.1",
+		"@changesets/cli": "^3.0.3",
 		"@types/node": "^24.19.1",
 		"oxfmt": "0.72.0",
 		"oxlint": "1.87.0",
