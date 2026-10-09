@@ -12,8 +12,9 @@ interface Pattern {
 const LEADING_PATTERNS: readonly Pattern[] = [
 	{
 		finding: 'changelog',
+		// A hyphen ends a `\b` word, so "Fixed-point" would read as "Fixed".
 		regex:
-			/^(?:added|updated|changed|modified|fixed|removed|refactored|replaced|renamed|moved|reverted|previously|originally)\b/iu,
+			/^(?:added|updated|changed|modified|fixed|removed|refactored|replaced|renamed|moved|reverted|previously|originally)(?![\w-])/iu,
 	},
 	{ finding: 'restating', regex: /^step\s+\d+\b/iu },
 	{ finding: 'restating', regex: /^(?:now|here|below|next|first|then|finally),?\s+(?:we|i)\b/iu },
