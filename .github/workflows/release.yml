@@ -6,6 +6,8 @@ name: Release
 on:
   push:
     branches: [main]
+  # Re-runs the same logic on demand, e.g. to retry a failed publish.
+  workflow_dispatch:
 
 # Each job declares only the permissions it needs. `id-token: write` stays on the publish job.
 permissions: {}
