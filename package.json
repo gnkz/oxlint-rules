@@ -1,6 +1,6 @@
 {
 	"name": "@gnkz/oxlint-rules",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Opinionated oxlint JS plugin: loose types, swallowed errors, narration comments and paragraph padding.",
 	"keywords": [
 		"lint",
