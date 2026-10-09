@@ -1,0 +1,70 @@
+name: Release
+
+# Push a `v<version>` tag matching package.json to publish. npm authenticates the job through
+# GitHub's OIDC token (trusted publishing), so no NPM_TOKEN secret is involved.
+on:
+  push:
+    tags: ['v*']
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    needs: check
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: write # create the GitHub release
+      id-token: write # mint the OIDC token npm exchanges for a publish credential
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing needs npm >= 11.5.1.
+      - run: npm install --global npm@latest
+
+      - name: Check tag matches package.json
+        run: |
+          version="$(node -p "require('./package.json').version")"
+
+          if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match package.json version ${version}"
+            exit 1
+          fi
+
+      # `prepublishOnly` builds dist before packing.
+      - run: pnpm install --frozen-lockfile
+
+      # Prerelease versions (1.2.0-beta.1) go to the `next` dist-tag so `latest` stays stable.
+      - name: Publish to npm
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+            npm publish --tag next
+          else
+            npm publish
+          fi
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          prerelease=()
+
+          if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+            prerelease=(--prerelease)
+          fi
+
+          gh release create "${GITHUB_REF_NAME}" --verify-tag --generate-notes "${prerelease[@]}"
